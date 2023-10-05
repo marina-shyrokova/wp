@@ -1,5 +1,5 @@
-# Python Course Project
-Welcome to the Python Course Project repository! This project is a part of our Python Course, focusing on building a comprehensive application with various features.
+# Welcome to the Python Course Project 
+This project is a part of our Python Course, focusing on building a comprehensive application with various features.
 
 ## Project Description
 This repository contains a Python-based application that serves as a practical demonstration of essential software development concepts. The project encompasses a user system with roles and permissions, order management, stock maintenance, user action logging, and reporting functionalities.
