@@ -14,3 +14,40 @@ This repository contains a Python-based application that serves as a practical d
 ## License
 This project is licensed. For details, see the [LICENSE.txt](https://github.com/maryna-shyrokova/warehouse-project/blob/main/LICENSE.txt) file.
 
+## Getting Started
+
+**Virtual enviroment**
+
+- Create a virtual enviroment using Python 3:
+    ```bash
+    python3 -m venv myenv
+    ```
+
+- Activate the virtual enviroment:
+
+    ```bash
+    source myenv/bin/activate  # For Linux/Mac
+
+    myenv\Scripts\activate  # For Windows
+    ```
+
+**IDE (Visual Studio Code):**
+- Install Visual Studio Code from the official website.
+
+- Install the necessary plugins:
+    - Python Extension: Provides support for Python development.
+    - Other relevant extensions based on your project's requirements.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
