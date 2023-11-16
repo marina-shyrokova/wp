@@ -1,7 +1,12 @@
-"""Data loader."""
+# flake8: noqa
+import sys
+import os
 
-from data import personnel as employees
-from data import stock as items
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.append(parent_dir)
+
+from cli.data import personnel as employees  # noqa: E402
+from cli.data import stock as items  # noqa: E402
 
 
 class MissingClassError(Exception):
@@ -28,7 +33,9 @@ class Loader:
     def __init__(self, *args, **kwargs):
         """Constructor."""
         if "model" not in kwargs:
-            raise MissingArgument("The loader requires a `model` keyword argument to work.")
+            raise MissingArgument(
+                "The loader requires a `model` keyword argument to work."
+            )
         self.model = kwargs["model"]
         self.parse()
 
@@ -41,7 +48,8 @@ class Loader:
 
     def __load_class(self, name):
         """Return a class."""
-        classes = __import__("classes")
+        from cli import classes
+
         if not hasattr(classes, name):
             raise MissingClassError(name)
         return getattr(classes, name)
