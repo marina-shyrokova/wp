@@ -1,27 +1,41 @@
-# flake8: noqa
-import sys
+"""Data loader."""
+import json
 import os
 
-parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
-sys.path.append(parent_dir)
+BASE_DIR = os.path.dirname(os.path.realpath(__file__))
+EMPLOYEES_PATH = os.path.join(BASE_DIR, "data", "personnel.json")
+STOCK_PATH = os.path.join(BASE_DIR, "data", "stock.json")
 
-from cli.data import personnel as employees  # noqa: E402
-from cli.data import stock as items  # noqa: E402
+employees = []
+iems = []
+
+with open(EMPLOYEES_PATH) as file:
+    employees = json.loads(file.read())
+
+with open(STOCK_PATH) as file:
+    items = json.loads(file.read())
+
+
+def _import(name):
+    """Dynamically import a package."""
+    try:
+        components = name.split(".")
+        mod = __import__(components[0])
+        for comp in components[1:]:
+            mod = getattr(mod, comp)
+    except Exception:
+        mod = None
+    return mod
 
 
 class MissingClassError(Exception):
     """Missing class exception."""
 
-    def __init__(self, name=None, message="Missing class."):
-        """Constructor."""
-        if name:
-            self.class_name = name
-            self.message = f"Missing class {name}."
+    def __init__(self, name=None, message="Missing class"):
+        """Construct object."""
+        self.class_name = name
+        self.message = f"Missing class {name}."
         super().__init__(self.message)
-
-
-class MissingArgument(Exception):
-    pass
 
 
 class Loader:
@@ -31,10 +45,10 @@ class Loader:
     objects = None
 
     def __init__(self, *args, **kwargs):
-        """Constructor."""
+        """Construct object."""
         if "model" not in kwargs:
-            raise MissingArgument(
-                "The loader requires a `model` keyword argument to work."
+            raise Exception(
+                "The loader requires a `model` " "keyword argument to work."
             )
         self.model = kwargs["model"]
         self.parse()
@@ -48,22 +62,21 @@ class Loader:
 
     def __load_class(self, name):
         """Return a class."""
-        from cli import classes
-
+        classes = _import("cli.classes")
         if not hasattr(classes, name):
             raise MissingClassError(name)
         return getattr(classes, name)
 
     def __parse_personnel(self):
         """Parse the personnel list."""
-        Employee = self.__load_class("Employee")
+        Employee = self.__load_class("Employee")  # noqa: N806
 
         return [Employee(**employee) for employee in employees]
 
     def __parse_stock(self):
         """Parse the stock."""
-        Item = self.__load_class("Item")
-        Warehouse = self.__load_class("Warehouse")
+        Item = self.__load_class("Item")  # noqa: N806
+        Warehouse = self.__load_class("Warehouse")  # noqa: N806
         warehouses = {}
         for item in items:
             warehouse_id = str(item["warehouse"])
@@ -75,3 +88,15 @@ class Loader:
     def __iter__(self, *args, **kwargs):
         """Iterate through the objects."""
         yield from self.objects
+
+    def to_dict(self):
+        """Return a dictionary."""
+        data = None
+        if self.model == "stock":
+            data = []
+            for warehouse in self.objects:
+                for item in warehouse.stock:
+                    item_dict = vars(item)
+                    item_dict["warehouse"] = warehouse.id
+                    data.append(item_dict)
+        return data

@@ -10,8 +10,10 @@ import sys
 import os
 from datetime import datetime as dt
 from collections import Counter
+import json
 
 parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(parent_dir)
 
 from cli.loader import Loader  # noqa: E402
@@ -52,7 +54,7 @@ def list_items_by_warehouse():
     for warehouse in stock:
         print(f"Total items in Warehouse {warehouse.id}:{warehouse.occupancy}")
 
-    return f"Listed {sum(count_of_items.values())} items."
+    return f"Listed {sum(count_of_items.values())} items"
 
 
 def search_and_order_item():
@@ -147,18 +149,6 @@ def check_user_validation(func):
         if user_validation:
             return func(user, *args, **kwargs)
         while not user_validation:
-            if isinstance(user, User):
-                answer = input(
-                    "Sorry, but you are not employee."
-                    "Would you like to change the name? y/n "
-                ).lower()
-                if answer == "y":
-                    user = get_user()
-                    globals()["user"] = user
-                elif answer == "n":
-                    break
-                else:
-                    print("Yoir answer has to be y or n")
             if isinstance(user, Employee):
                 password = input("Please input your password:")
                 user_validation = user.authenticate(password)
@@ -178,6 +168,18 @@ def check_user_validation(func):
                     else:
                         print("Yoir answer has to be y or n")
                         working_continiue()
+            elif isinstance(user, User):
+                answer = input(
+                    "Sorry, but you are not employee."
+                    "Would you like to change the name? y/n "
+                ).lower()
+                if answer == "y":
+                    user = get_user()
+                    globals()["user"] = user
+                elif answer == "n":
+                    break
+                else:
+                    print("Yoir answer has to be y or n")
             else:
                 answer = input(
                     "User_name or password is not valid."
@@ -185,6 +187,7 @@ def check_user_validation(func):
                 ).lower()
                 if answer == "y":
                     user = get_user()
+                    globals()["user"] = user
                 elif answer == "n":
                     break
                 else:
@@ -207,10 +210,34 @@ def order_item(user, selected_item, total):
     while True:
         try:
             amount = int(input("How many would you like? "))
+            if amount == 0:
+                print(f"The amount has to be grater than 0")
+                working_continiue()
             if amount >= total:
                 print(f"There are not avalibale {amount}, only {total}")
                 working_continiue()
             elif amount < total:
+                stock_dict = stock.to_dict()
+                index_to_remove = []
+                i = 0
+                for item in stock_dict:
+                    i += 1
+                    if (
+                        selected_item.lower()
+                        == (f"{item['state']} {item['category']}").lower()
+                    ):
+                        index_to_remove.append(i - 1)
+                        if len(index_to_remove) == amount:
+                            break
+
+                for i in index_to_remove:
+                    del stock_dict[i]
+
+                json_file_path = os.path.join(current_dir, "data", "stock.json")
+
+                with open(json_file_path, "w") as file:
+                    json.dump(stock_dict, file, indent=1)
+
                 user.order(selected_item, amount)
                 break
         except ValueError:
@@ -252,7 +279,6 @@ def browse_by_category():
 
         if number_of_category > len(summary_of_categories):
             print(f"There are only {len(summary_of_categories)} categories")
-            working_continiue()
 
         else:
             selected_category = None
@@ -262,14 +288,12 @@ def browse_by_category():
                     selected_category = category_info[1]
                     break
 
-            search_item(selected_category)
+            return search_item(selected_category)
 
     except ValueError:
         print("Invalid input. Try again.")
     except TypeError:
         print("It has to be a number of category")
-    finally:
-        working_continiue()
 
 
 def search_item(selected_category):
@@ -308,15 +332,27 @@ def session_operation():
         return
     elif operation == "1":
         action = list_items_by_warehouse()
-        session_actions.append(action)
+        session_actions.append(
+            {
+                user.__class__.__name__: f"{user._name}. {action}. {dt.now().strftime('%Y-%m-%d %H:%M:%S.%f')}."
+            }
+        )
         working_continiue()
     elif operation == "2":
         action = search_and_order_item()
-        session_actions.append(action)
+        session_actions.append(
+            {
+                user.__class__.__name__: f"{user._name}. {action}. {dt.now().strftime('%Y-%m-%d %H:%M:%S.%f')}."
+            }
+        )
         working_continiue()
     elif operation == "3":
         action = browse_by_category()
-        session_actions.append(action)
+        session_actions.append(
+            {
+                user.__class__.__name__: f"{user._name}. {action}. {dt.now().strftime('%Y-%m-%d %H:%M:%S.%f')}."
+            }
+        )
         working_continiue()
     else:
         print("*" * 50)
@@ -378,6 +414,19 @@ if __name__ == "__main__":
     session_operation()
     print(user.bye())
     if session_actions:
-        print("In this session you have:")
-        for i, action in enumerate(session_actions, start=1):
-            print(f"""    {i}. {action}""")
+        users_logs = []
+        emploeeys_logs = []
+        for data in session_actions:
+            if "User" in data:
+                users_logs.append(f"{data['User']}\n")
+
+            elif "Employee" in data:
+                emploeeys_logs.append(f"{data['Employee']}\n")
+
+        path_file_users_log = os.path.join(current_dir, "log", "users.log")
+        with open(path_file_users_log, "a") as file:
+            file.writelines(users_logs)
+
+        path_file_employees_log = os.path.join(current_dir, "log", "employees.log")
+        with open(path_file_employees_log, "a") as file:
+            file.writelines(emploeeys_logs)
