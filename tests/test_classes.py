@@ -1,6 +1,6 @@
 """This module tests classes."""
 import unittest
-from cli.classes import Warehouse, Item, User, Employee
+from cli.classes import Warehouse, Item, User, Employee, MissingArgument
 
 
 class TestClassNames(unittest.TestCase):
@@ -60,8 +60,8 @@ class TestEmployee(unittest.TestCase):
 
     def test_employee_with_missing_argument(self):
         """Test the 'Employee' class with the missing argument."""
-        with self.assertRaises(ValueError):
-            employee = Employee("", "")
+        with self.assertRaises(MissingArgument):
+            employee = Employee("Marina")
             self.assertFalse(employee.is_authenticated)
             self.assertIsNone(employee.head_of)
 
@@ -131,6 +131,18 @@ class TestItem(unittest.TestCase):
 
         self.assertTrue(isinstance(item.__str__(), str))
         self.assertEqual(item.__str__(), "New Tablet")
+
+
+def test_class_exceptions(self):
+    """Test classes exceptions."""
+    # An Employee without a user_name raises a MissingArgument exception
+    with self.assertRaises(MissingArgument) as context:
+        Employee(password="password")
+    self.assertEqual(context.exception.argument, "user_name")
+    # An Employee without a password raises a MissingArgument exception
+    with self.assertRaises(MissingArgument) as context:
+        Employee(user_name="Username")
+    self.assertEqual(context.exception.argument, "password")
 
 
 if __name__ == "__main__":

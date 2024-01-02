@@ -1,19 +1,56 @@
 """Data loader."""
 import json
 import os
+import psycopg2
+import datetime
 
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
 EMPLOYEES_PATH = os.path.join(BASE_DIR, "data", "personnel.json")
 STOCK_PATH = os.path.join(BASE_DIR, "data", "stock.json")
 
 employees = []
-iems = []
 
 with open(EMPLOYEES_PATH) as file:
     employees = json.loads(file.read())
 
-with open(STOCK_PATH) as file:
-    items = json.loads(file.read())
+
+try:
+    conn = psycopg2.connect(
+        dbname="warehouse_project",
+        user="postgres",
+        password="11111",
+        host="localhost",
+        port="5432",
+    )
+except psycopg2.Error as e:
+    print(e)
+
+if conn:
+    cursor = conn.cursor()
+
+    query = "SELECT * FROM item"
+
+    cursor.execute(query)
+
+    items_data = cursor.fetchall()
+    items = []
+
+    for row in items_data:
+        item_dict ={
+            "state" : row[0],
+            "category": row[1],
+            "warehouse": row[2],
+            "date_of_stock": row[3].strftime('%Y-%m-%d %H:%M:%S')
+        }
+        items.append(item_dict)
+
+    items_json = json.dumps(items_data, default=str)
+
+    print (items)
+
+
+    cursor.close()
+    conn.close()
 
 
 def _import(name):

@@ -1,6 +1,14 @@
 """Classes for managing warehouse, items in stock, and user."""
 
 
+class MissingArgument(Exception):
+    def __init__(self, argument: str, message: str):
+        self.argument = argument
+        self.message = message
+
+        super().__init__(f"{self.argument} is missing. {self.message}")
+
+
 class Warehouse:
     """Class for managing wahrehouse."""
 
@@ -131,7 +139,7 @@ class Employee(User):
     """Class for managing employee's class."""
 
     def __init__(
-        self, user_name: str, password: str, head_of: list = None
+        self, user_name=None, password=None, head_of: list = None
     ) -> None:  # no-qa
         """Initialize an Employee object and inherits from the User class.
 
@@ -150,8 +158,11 @@ class Employee(User):
         if either is missing, it raises a VallueError.
         """
         super().__init__(user_name)
-        if not user_name or not password:
-            raise ValueError("Both 'user_name' and 'password' are required.")
+        if user_name is None:
+            raise MissingArgument("user_name", "An employee can not be anonymous.")
+        elif password is None:
+            raise MissingArgument("password", "An employee requires authentication.")
+
         self.__password = password
         self.head_of = head_of
 

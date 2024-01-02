@@ -3408,12 +3408,6 @@
   "date_of_stock": "2019-12-14 05:56:04"
  },
  {
-  "state": "Almost new",
-  "category": "Tablet",
-  "warehouse": "1",
-  "date_of_stock": "2020-09-02 02:52:15"
- },
- {
   "state": "Blue",
   "category": "USB hub",
   "warehouse": "1",
@@ -6385,12 +6379,6 @@
  },
  {
   "state": "Red",
-  "category": "Beamer",
-  "warehouse": "1",
-  "date_of_stock": "2020-09-12 11:40:54"
- },
- {
-  "state": "Red",
   "category": "Home-cinema",
   "warehouse": "1",
   "date_of_stock": "2019-09-04 21:42:25"
@@ -7468,12 +7456,6 @@
   "category": "Router",
   "warehouse": "1",
   "date_of_stock": "2019-12-10 21:22:03"
- },
- {
-  "state": "White",
-  "category": "Speakers",
-  "warehouse": "1",
-  "date_of_stock": "2021-04-26 21:28:50"
  },
  {
   "state": "High quality",
